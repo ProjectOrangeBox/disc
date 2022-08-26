@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace dmyers\disc;
 
-use SplFileInfo;
 use SplFileObject;
 use dmyers\disc\export;
 use dmyers\disc\import;
+use dmyers\disc\discSplFileInfo;
 use dmyers\disc\exceptions\FileException;
 
-class File extends SplFileInfo
+class File extends discSplFileInfo
 {
 	protected $fileObject = null;
 
@@ -53,23 +53,22 @@ class File extends SplFileInfo
 	 */
 	public function open(string $mode = 'r'): self
 	{
-		$path = Disc::resolve($this->getPathname());
+		$path = disc::resolve($this->getPathname());
 
 		if (is_dir($path)) {
-			throw new FileException(Disc::resolve($this->getPathname(), true) . ' is a Directory');
+			throw new FileException(disc::resolve($this->getPathname(), true) . ' is a Directory');
 		}
 
 		if (in_array($mode, ['r', 'r+'])) {
-			Disc::fileRequired($path);
+			disc::fileRequired($path);
 		} else {
-			Disc::autoGenMissingDirectory($path);
+			disc::autoGenMissingDirectory($path);
 		}
 
 		/* close properly */
-		if ($this->fileObject) {
-			$this->fileObject = null;
-		}
+		unset($this->fileObject);
 
+		/* make a new one */
 		$this->fileObject = new SplFileObject($path, $mode);
 
 		return $this;
@@ -108,7 +107,7 @@ class File extends SplFileInfo
 	{
 		$this->requireOpenFile(); /* throws error on fail */
 
-		$this->fileObject = null;
+		unset($this->fileObject);
 
 		return $this;
 	}
@@ -142,6 +141,8 @@ class File extends SplFileInfo
 	 */
 	public function writeLine(string $string, string $lineEnding = null)
 	{
+		$this->requireOpenFile(); /* throws error on fail */
+
 		$lineEnding = ($lineEnding) ?? PHP_EOL;
 
 		return $this->write($string . $lineEnding);
@@ -156,6 +157,8 @@ class File extends SplFileInfo
 	 */
 	public function character() /* string|false */
 	{
+		$this->requireOpenFile(); /* throws error on fail */
+
 		return $this->characters(1);
 	}
 
@@ -170,6 +173,8 @@ class File extends SplFileInfo
 	 */
 	public function characters(int $length) /* string|false */
 	{
+		$this->requireOpenFile(); /* throws error on fail */
+
 		return $this->fileObject->fread($length);
 	}
 
@@ -232,231 +237,15 @@ class File extends SplFileInfo
 	}
 
 	/**
-	 * Method isDirectory
-	 *
-	 * @return bool
-	 */
-	public function isDirectory(): bool
-	{
-		return $this->isDir();
-	}
-
-	/**
 	 * Method filename
 	 *
 	 * @param string $suffix [explicite description]
 	 *
 	 * @return string
 	 */
-	public function filename(string $suffix = null): string
+	public function name(string $suffix = null): string
 	{
 		return ($suffix) ? $this->getBasename($suffix) : $this->getFilename();
-	}
-
-	/**
-	 * dirname — Returns a parent directory's path
-	 *
-	 * @param string $path [path to file/directory]
-	 * @param int $levels The number of parent directories to go up.
-	 *
-	 * @return string
-	 */
-	public function directory(): string
-	{
-		return Disc::resolve($this->getPath(), true);
-	}
-
-	/**
-	 * filesize — Gets file size
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return mixed
-	 */
-	public function size(): int
-	{
-		return $this->getSize();
-	}
-
-	/**
-	 * fileatime — Gets last access time of file
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
-	public function accessTime(string $dateFormat = null) /* int|string */
-	{
-		return self::formatTime($this->getATime(), $dateFormat);
-	}
-
-	/**
-	 * filectime — Gets inode change time of file
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
-	public function changeTime(string $dateFormat = null) /* int|string */
-	{
-		return self::formatTime($this->getCTime(), $dateFormat);
-	}
-
-	/**
-	 * filemtime — Gets file modification time
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
-	public function modificationTime(string $dateFormat = null) /* int|string */
-	{
-		return self::formatTime($this->getMTime(), $dateFormat);
-	}
-
-	/**
-	 * filegroup — Gets file group
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return mixed
-	 */
-	public function group(bool $details = false) /* array|int|false */
-	{
-		$id = $this->getGroup();
-
-		return ($id && $details) ? posix_getgrgid($id) : $id;
-	}
-
-	/**
-	 * fileowner — Gets file owner
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
-	public function owner(bool $details = false) /* array|int|false */
-	{
-		$id = $this->getOwner();
-
-		return ($id && $details) ? posix_getpwuid($id) : $id;
-	}
-
-	/**
-	 * fileperms — Gets file permissions
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
-	public function permissions(int $options = 0)
-	{
-		return ($options) ? Disc::formatPermissions($this->getPerms(), $options) : $this->getPerms();
-	}
-
-	/**
-	 * Method changePermissions
-	 *
-	 * @param string $requiredPath [explicite description]
-	 * @param int $mode [explicite description]
-	 *
-	 * @return bool
-	 */
-	public function changePermissions(int $mode): bool
-	{
-		return \chmod($this->getRealPath(), $mode);
-	}
-
-	/**
-	 * Method changeGroup
-	 *
-	 * @param string $requiredPath [explicite description]
-	 * @param $group [explicite description]
-	 *
-	 * @return bool
-	 */
-	public function changeGroup($group): bool
-	{
-		return \chgrp($this->getRealPath(), $group);
-	}
-
-	/**
-	 * Method changeOwner
-	 *
-	 * @param string $requiredPath [explicite description]
-	 * @param $user [explicite description]
-	 *
-	 * @return bool
-	 */
-	public function changeOwner($user): bool
-	{
-		return \chown($this->getRealPath(), $user);
-	}
-
-	/**
-	 * filetype — Gets file type
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return mixed
-	 */
-	public function type() /* string|false */
-	{
-		return $this->getType();
-	}
-
-	/**
-	 * info — Gives information about a file
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return mixed
-	 */
-	public function info(?string $option = null, $arg1 = null) /* array|false */
-	{
-		$info = [];
-
-		$info += \stat($this->getRealPath());
-		$info += \pathInfo($this->getRealPath());
-
-		$info['dirname'] = Disc::resolve($info['dirname'], true);
-
-		$info['type'] = $this->getType();
-
-		$dateFormat = ($arg1) ? $arg1 : 'r';
-
-		$info['atime_display'] = $this->accessTime($dateFormat);
-		$info['mtime_display'] = $this->modificationTime($dateFormat);
-		$info['ctime_display'] = $this->changeTime($dateFormat);
-
-		$permissions = $this->getPerms();
-
-		$info['permissions_display'] = Disc::formatPermissions($permissions, 3);
-		$info['permissions_t'] = Disc::formatPermissions($permissions, 1);
-		$info['permissions_ugw'] = Disc::formatPermissions($permissions, 2);
-
-
-		$info['uid_display'] = $this->owner(true)['name'];
-		$info['gid_display'] = $this->group(true)['name'];
-
-		$info['size_display'] = Disc::formatSize($this->size());
-
-		$info['isDirectory'] = (bool)$this->isDirectory();
-		$info['isWritable'] = (bool)$this->isWritable();
-		$info['isReadable'] = (bool)$this->isReadable();
-		$info['isFile'] = (bool)$this->isFile();
-
-		$info['root'] = Disc::getRoot();
-
-		if ($option) {
-			if (!in_array($option, $info)) {
-				throw new FileException('Unknown option ' . $option);
-			}
-
-			$info = $info[$option];
-		}
-
-		return $info;
 	}
 
 	/**
@@ -469,7 +258,7 @@ class File extends SplFileInfo
 	 */
 	public function asArray(int $flags = 0): array
 	{
-		return \file($this->getRealPath(), $flags);
+		return \file($this->getPathname(), $flags);
 	}
 
 	/**
@@ -481,7 +270,7 @@ class File extends SplFileInfo
 	 */
 	public function echo(): int
 	{
-		return \readfile($this->getRealPath());
+		return \readfile($this->getPathname());
 	}
 
 	/**
@@ -497,78 +286,23 @@ class File extends SplFileInfo
 	}
 
 	/**
-	 * Method touch
-	 *
-	 * @return bool
-	 */
-	public function touch(): bool
-	{
-		return \touch($this->getRealPath());
-	}
-
-	/**
-	 * Method move
-	 *
-	 * @param string $name [explicite description]
-	 *
-	 * @return self
-	 */
-	public function move(string $name): self
-	{
-		return Disc::renameFile($this, $name);
-	}
-
-	/**
-	 * Method rename
-	 *
-	 * @param string $name [explicite description]
-	 *
-	 * @return self
-	 */
-	public function rename(string $name): self
-	{
-		return self::move($name);
-	}
-
-	/**
 	 * Method remove
 	 *
 	 * @return bool
 	 */
 	public function remove(): bool
 	{
-		if ($this->fileObject) {
-			$this->fileObject = null;
+		unset($this->fileObject);
+
+		$success = false;
+
+		$filename = $this->getPathname();
+
+		if (file_exists($filename)) {
+			$success = \unlink($filename);
 		}
 
-		return \unlink($this->getRealPath());
-	}
-
-	/**
-	 * Method copy
-	 *
-	 * @param string $destination [explicite description]
-	 *
-	 * @return bool
-	 */
-	public function copy(string $destination): bool
-	{
-		Disc::autoGenMissingDirectory($destination);
-
-		return \copy($this->getRealPath(), Disc::resolve($destination));
-	}
-
-	/**
-	 * Method formatTime
-	 *
-	 * @param $timestamp [explicite description]
-	 * @param string $dateFormat [explicite description]
-	 *
-	 * @return void
-	 */
-	public function formatTime(?int $timestamp, string $dateFormat) /* int|string */
-	{
-		return ($timestamp && $dateFormat) ? date($dateFormat, $timestamp) : $timestamp;
+		return $success;
 	}
 
 	/**

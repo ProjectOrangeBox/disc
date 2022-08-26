@@ -153,6 +153,8 @@ class Disc
 		return include_once self::resolve($requiredPath, false, true);
 	}
 
+	/* generators */
+
 	public static function directory(string $path): Directory
 	{
 		$path = self::resolve($path);
@@ -175,11 +177,26 @@ class Disc
 		return new File($path);
 	}
 
+	/* formatters */
+
 	public static function formatSize(int $bytes): string
 	{
 		$i = floor(log($bytes, 1024));
 
 		return round($bytes / pow(1024, $i), [0, 0, 2, 2, 3][$i]) . ['B', 'kB', 'MB', 'GB', 'TB'][$i];
+	}
+
+	/**
+	 * Method formatTime
+	 *
+	 * @param $timestamp [explicite description]
+	 * @param string $dateFormat [explicite description]
+	 *
+	 * @return void
+	 */
+	public function formatTime(?int $timestamp, string $dateFormat) /* int|string */
+	{
+		return ($timestamp && $dateFormat) ? date($dateFormat, $timestamp) : $timestamp;
 	}
 
 	public static function formatPermissions(int $mode, int $option = 3): string
@@ -242,6 +259,8 @@ class Disc
 		return $info;
 	}
 
+	/* make directory */
+
 	public static function makeDirectory(string $path, int $mode = 0777, bool $recursive = true): bool
 	{
 		$path = self::resolve($path);
@@ -264,44 +283,14 @@ class Disc
 		}
 	}
 
-	public static function renameFile(File $fileObj, string $newname): File
-	{
-		$newPath = self::resolve($newname);
-
-		self::autoGenMissingDirectory($newPath);
-
-		$oldPath = $fileObj->getRealPath();
-
-		$fileObj = null; /* close */
-
-		\rename($oldPath, $newPath);
-
-		return self::file($newname);
-	}
-
-	public static function renameDirectory(Directory $dirObj, string $newname): Directory
-	{
-		$oldPath = $dirObj->getRealPath();
-
-		$dirObj = null; /* close */
-
-		$newPath = self::resolve($newname);
-
-		\rename($oldPath, $newPath);
-
-		return self::directory($newPath);
-	}
-
 	/**
-	 * New (but used automatically by file_put_contents when no flags are used)
-	 *
 	 * atomicFilePutContents - atomic file_put_contents
 	 *
 	 * @param string $path
 	 * @param mixed $content
 	 * @return int returns the number of bytes that were written to the file.
 	 */
-	public static function atomicSaveContent(string $path, $content): int
+	public static function atomicSaveContent(string $path, string $content): int
 	{
 		/* create absolute path */
 		$path = self::resolve($path);
