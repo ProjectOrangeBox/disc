@@ -22,10 +22,7 @@ final class directoryTest extends TestCase
 	public function setUp(): void
 	{
 		if (!defined('__ROOT__')) {
-			define('__ROOT__', realpath(__DIR__ . '/../../../'));
-		}
-		if (!defined('__TESTDIR__')) {
-			define('__TESTDIR__', realpath(__DIR__ . '/../test_working'));
+			define('__ROOT__', realpath(__DIR__ . '/support'));
 		}
 
 		disc::root(__ROOT__);
@@ -33,6 +30,6 @@ final class directoryTest extends TestCase
 
 	public function tearDown(): void
 	{
-		disc::directory('/loca/disc/tests/test_working')->removeContents();
+		disc::directory('/working')->removeContents();
 	}
 } /* end class */

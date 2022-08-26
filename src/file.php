@@ -280,9 +280,56 @@ class File extends discSplFileInfo
 	 *
 	 * @return string
 	 */
-	public function content(): string
+	public function get(): string
 	{
 		return \file_get_contents($this->getPathname());
+	}
+
+	/**
+	 * atomicFilePutContents - atomic file_put_contents
+	 *
+	 * @param string $path
+	 * @param mixed $content
+	 * @return int returns the number of bytes that were written to the file.
+	 */
+	public function save(string $content): int
+	{
+		/* create absolute path */
+		$path = $this->getPathname();
+
+		disc::autoGenMissingDirectory($path);
+
+		/* get the path where you want to save this file so we can put our file in the same directory */
+		$directory = \dirname($path);
+
+		/* is this directory writeable */
+		if (!is_writable($directory)) {
+			throw new fileException($directory . ' is not writable.');
+		}
+
+		/* create a temporary file with unique file name and prefix */
+		$temporaryFile = \tempnam($directory, 'afpc_');
+
+		/* did we get a temporary filename */
+		if ($temporaryFile === false) {
+			throw new fileException('Could not create temporary file ' . $temporaryFile . '.');
+		}
+
+		/* write to the temporary file */
+		$bytes = \file_put_contents($temporaryFile, $content, LOCK_EX);
+
+		/* did we write anything? */
+		if ($bytes === false) {
+			throw new fileException('No bytes written by file_put_contents');
+		}
+
+		/* move it into place - this is the atomic function */
+		if (\rename($temporaryFile, $path) === false) {
+			throw new fileException('Could not rename temporary file ' . $temporaryFile . ' ' . $path . '.');
+		}
+
+		/* return the number of bytes written */
+		return $bytes;
 	}
 
 	/**

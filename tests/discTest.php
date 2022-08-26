@@ -30,7 +30,7 @@ final class discTest extends TestCase
 
 	public function tearDown(): void
 	{
-		disc::directory('/working')->removeContents();
+		//disc::directory('/working')->removeContents();
 	}
 
 	public function testGetRoot(): void
@@ -50,46 +50,41 @@ final class discTest extends TestCase
 	public function testFileRequired(): void
 	{
 		/* should not throw an exception */
-		$this->assertEquals(null, disc::fileRequired(__TESTFILES__ . '/123.txt'));
+		$this->assertEquals(null, disc::fileRequired('/files/123.txt'));
 
 		$this->expectException(DiscException::class);
-		disc::fileRequired(__TESTFILES__ . '/xyz.txt');
+		disc::fileRequired('/files/xyz.txt');
 	}
 
 	public function testDirectoryRequired(): void
 	{
 		/* should not throw an exception */
-		$this->assertEquals(null, disc::fileRequired(__TESTFILES__ . '/testfolder'));
+		$this->assertEquals(null, disc::fileRequired('/files/testfolder'));
 
 		$this->expectException(DiscException::class);
-		disc::fileRequired(__TESTFILES__ . '/foobar');
+		disc::fileRequired('/files/foobar');
 	}
 
 	public function testStripRootPath(): void
 	{
 		$newPath = disc::stripRootPath('/file/path.txt', true);
-
 		$this->assertEquals('/file/path.txt', $newPath);
 
 		$newPath = disc::stripRootPath(__ROOT__ . '/file/path.txt', true);
-
 		$this->assertEquals('/file/path.txt', $newPath);
 
 		$newPath = disc::stripRootPath(__ROOT__ . '/file/path.txt', false);
-
 		$this->assertEquals(__ROOT__ . '/file/path.txt', $newPath);
 	}
 
 	public function testExists(): void
 	{
-		$this->assertEquals(true, disc::exists(__TESTFILES__ . '/123.txt'));
+		$this->assertEquals(true, disc::exists('/files/123.txt'));
+		$this->assertEquals(false, disc::exists('/files/xyz.txt'));
 
-		$this->assertEquals(false, disc::exists(__TESTFILES__ . '/xyz.txt'));
 
-
-		$this->assertEquals(true, disc::exists(__TESTFILES__ . '/testfolder'));
-
-		$this->assertEquals(false, disc::exists(__TESTFILES__ . '/foobar'));
+		$this->assertEquals(true, disc::exists('/files/testfolder'));
+		$this->assertEquals(false, disc::exists('/files/foobar'));
 	}
 
 	public function testFile(): void
@@ -133,21 +128,16 @@ final class discTest extends TestCase
 
 	public function testMakeDirectory(): void
 	{
-		$this->assertEquals(true, disc::makeDirectory(__TESTDIR__ . '/a/b/c/newtestfolder'));
+		$this->assertEquals(true, disc::makeDirectory('/working/a/b/c/newtestfolder'));
+
+		$this->assertTrue(disc::exists('/working/a/b/c/newtestfolder'));
 	}
 
 	public function testAutoGenMissingDirectory(): void
 	{
-		$this->assertEquals(true, true);
-	}
+		$this->assertEquals(true, disc::autoGenMissingDirectory('/working/x/y/z/newtestfolder.txt'));
 
-	public function testAtomicSaveContent(): void
-	{
-		$this->assertEquals(true, true);
-	}
-
-	public function testRemovePhpFileFromOpcache(): void
-	{
-		$this->assertEquals(true, true);
+		$this->assertTrue(disc::exists('/working/x/y/z'));
+		$this->assertFalse(disc::exists('/working/x/y/z/newtestfolder.txt'));
 	}
 } /* end class */
