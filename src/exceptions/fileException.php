@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace dmyers\orange\disc\exceptions;
+namespace dmyers\disc\exceptions;
 
 class FileException extends \Exception
 {

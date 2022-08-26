@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace dmyers\orange\disc;
+namespace dmyers\disc;
 
-use dmyers\orange\disc\File;
-use dmyers\orange\disc\exceptions\FileException;
+use dmyers\disc\File;
+use dmyers\disc\exceptions\FileException;
 
 class Import
 {
@@ -106,7 +106,7 @@ class Import
 		$keys = null;
 		$handle = fopen($this->path, 'r');
 
-		while (($columns = fgetcsv($handle, 8192, $separator, $enclosure, $escape)) !== FALSE) {
+		while (($columns = fgetcsv($handle, 8192, $separator, $enclosure, $escape)) !== false) {
 			if ($includeHeader) {
 				$keys = $columns;
 				$includeHeader = false;

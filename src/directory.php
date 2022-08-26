@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace dmyers\orange\disc;
+namespace dmyers\disc;
 
 use SplFileInfo;
-use dmyers\orange\disc\exceptions\DirectoryException;
 
 class Directory extends SplFileInfo
 {
@@ -93,7 +92,7 @@ class Directory extends SplFileInfo
 			$this->mkdir($destination, 0777, true);
 		}
 
-		while (($file = readdir($dir))) {
+		while ($file = readdir($dir)) {
 			if (($file != '.') && ($file != '..')) {
 				if (is_dir($source . '/' . $file)) {
 					$this->copyRecursive($source . '/' . $file, $destination . '/' . $file);

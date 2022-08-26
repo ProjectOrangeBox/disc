@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace dmyers\orange\disc;
+namespace dmyers\disc;
 
-use dmyers\orange\disc\File;
-use dmyers\orange\disc\Directory;
-use dmyers\orange\disc\exceptions\DiscException;
+use dmyers\disc\File;
+use dmyers\disc\Directory;
+use dmyers\disc\exceptions\DiscException;
 
 /**
  * File System Functions

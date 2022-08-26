@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace dmyers\orange\disc;
+namespace dmyers\disc;
 
 use SplFileInfo;
 use SplFileObject;
-use dmyers\orange\disc\export;
-use dmyers\orange\disc\import;
-use dmyers\orange\disc\exceptions\FileException;
+use dmyers\disc\export;
+use dmyers\disc\import;
+use dmyers\disc\exceptions\FileException;
 
 class File extends SplFileInfo
 {

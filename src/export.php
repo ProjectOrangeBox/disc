@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace dmyers\orange\disc;
+namespace dmyers\disc;
 
-use dmyers\orange\disc\File;
-use dmyers\orange\disc\exceptions\FileException;
+use dmyers\disc\File;
+use dmyers\disc\exceptions\FileException;
 
 class Export
 {
