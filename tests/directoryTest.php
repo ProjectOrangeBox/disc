@@ -24,6 +24,9 @@ final class directoryTest extends TestCase
 		if (!defined('__ROOT__')) {
 			define('__ROOT__', realpath(__DIR__ . '/../../../'));
 		}
+		if (!defined('__TESTDIR__')) {
+			define('__TESTDIR__', realpath(__DIR__ . '/../test_working'));
+		}
 
 		disc::root(__ROOT__);
 	}

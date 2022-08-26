@@ -183,7 +183,7 @@ class Disc
 	{
 		$i = floor(log($bytes, 1024));
 
-		return round($bytes / pow(1024, $i), [0, 0, 2, 2, 3][$i]) . ['B', 'kB', 'MB', 'GB', 'TB'][$i];
+		return round($bytes / pow(1024, $i), [0, 1, 2, 2, 3][$i]) . ['B', 'kB', 'MB', 'GB', 'TB'][$i];
 	}
 
 	/**
@@ -194,9 +194,9 @@ class Disc
 	 *
 	 * @return void
 	 */
-	public function formatTime(?int $timestamp, string $dateFormat) /* int|string */
+	public function formatTime(?int $timestamp, ?string $dateFormat = null) /* int|string */
 	{
-		return ($timestamp && $dateFormat) ? date($dateFormat, $timestamp) : $timestamp;
+		return ($timestamp !== null && $dateFormat !== null) ? date($dateFormat, $timestamp) : $timestamp;
 	}
 
 	public static function formatPermissions(int $mode, int $option = 3): string
@@ -265,12 +265,12 @@ class Disc
 	{
 		$path = self::resolve($path);
 
+		$bool = true;
+
 		if (!\file_exists($path)) {
 			$umask = \umask(0);
 			$bool = \mkdir($path, $mode, $recursive);
 			\umask($umask);
-		} else {
-			$bool = true;
 		}
 
 		return $bool;
