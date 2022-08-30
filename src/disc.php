@@ -76,7 +76,7 @@ class Disc
 	 *
 	 * @return string
 	 */
-	public static function resolve(string $path, bool $remove = false, string $required = null): string
+	public static function resolve(string $path, bool $remove = false, string $required = ''): string
 	{
 		if (empty(self::$rootPath)) {
 			throw new discException(__METHOD__ . ' root path is not defined. Use disc::root(...).');
@@ -99,6 +99,7 @@ class Disc
 					throw new discException('No such directory. ' . $short);
 				}
 				break;
+			default:
 		}
 
 		/* now resolve - stripped or added? */

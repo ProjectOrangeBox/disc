@@ -11,13 +11,6 @@ class Directory extends DiscSplFileInfo
 {
 	const TYPE = 'directory';
 
-	/**
-	 * Method filename
-	 *
-	 * @param string $suffix [explicite description]
-	 *
-	 * @return string
-	 */
 	public function name(): string
 	{
 		return $this->getFilename();
@@ -66,9 +59,9 @@ class Directory extends DiscSplFileInfo
 		return new Directory($destination);
 	}
 
-	public function remove(bool $removeDirectory = true, bool $quiet = true): bool
+	public function remove(bool $removeDirectory = true, bool $quiet = false): bool
 	{
-		$path = $this->getPath(true, !$quiet);
+		$path = $this->getPath(!$quiet);
 
 		if (is_dir($path)) {
 			self::removeRecursive($path, $removeDirectory);
@@ -77,7 +70,7 @@ class Directory extends DiscSplFileInfo
 		return true; /* ?? */
 	}
 
-	public function removeContents(bool $quiet = true): bool
+	public function removeContents(bool $quiet = false): bool
 	{
 		return $this->remove(false, $quiet);
 	}

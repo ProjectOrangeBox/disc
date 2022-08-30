@@ -115,7 +115,7 @@ class DiscSplFileInfo extends SplFileInfo
 
 	public function ownerName() /* array|int|false */
 	{
-		return posix_getpwuid($this->owner());
+		return posix_getpwuid($this->owner())['name'];
 	}
 
 	public function permissions(int $options = 0)
