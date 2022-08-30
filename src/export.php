@@ -18,7 +18,7 @@ class Export
 	{
 		$this->fileInfo = $fileInfo;
 
-		$this->path = $this->fileInfo->getPathname();
+		$this->path = $fileInfo->getPath();
 	}
 
 	public function convertToStringPhp($input): string
@@ -72,7 +72,7 @@ class Export
 
 	public function php($data, ?int $chmod = null): int
 	{
-		$bytes = $this->changeModeOnBytes($this->fileInfo->save($this->path, $this->convertToStringPhp($data)), $chmod);
+		$bytes = $this->changeModeOnBytes($this->fileInfo->save($this->convertToStringPhp($data)), $chmod);
 
 		/* if it's cached we need to flush it out so the old one isn't loaded */
 		$this->removePhpFileFromOpcache($this->path);
@@ -82,7 +82,7 @@ class Export
 
 	public function removePhpFileFromOpcache(string $path): bool
 	{
-		return (\function_exists('opcache_invalidate')) ? \opcache_invalidate(self::resolve($path), true) : true;
+		return (\function_exists('opcache_invalidate')) ? \opcache_invalidate(disc::resolve($path), true) : true;
 	}
 
 	public function json($jsonObj, ?bool $pretty = false, ?int $flags = null, ?int $depth = 512, ?int $chmod = null): int
@@ -90,17 +90,17 @@ class Export
 		$pretty = ($pretty) ?? false;
 		$depth = ($depth) ?? 512;
 
-		return $this->changeModeOnBytes($this->fileInfo->save($this->path, $this->convertToStringJson($jsonObj, $pretty, $flags, $depth)), $chmod);
+		return $this->changeModeOnBytes($this->fileInfo->save($this->convertToStringJson($jsonObj, $pretty, $flags, $depth)), $chmod);
 	}
 
 	public function ini(array $array, ?int $chmod = null): int
 	{
-		return $this->changeModeOnBytes($this->fileInfo->save($this->path, $this->convertToStringIni($array)), $chmod);
+		return $this->changeModeOnBytes($this->fileInfo->save($this->convertToStringIni($array)), $chmod);
 	}
 
 	public function content(string $content, ?int $chmod = null): int
 	{
-		return $this->changeModeOnBytes($this->fileInfo->save($this->path, $content), $chmod);
+		return $this->changeModeOnBytes($this->fileInfo->save($content), $chmod);
 	}
 
 	public function csv(array $table, bool $includeHeader = true, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n")

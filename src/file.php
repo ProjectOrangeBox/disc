@@ -10,8 +10,10 @@ use dmyers\disc\import;
 use dmyers\disc\discSplFileInfo;
 use dmyers\disc\exceptions\FileException;
 
-class File extends discSplFileInfo
+class File extends DiscSplFileInfo
 {
+	const TYPE = 'file';
+
 	protected $fileObject = null;
 
 	public $import = null;
@@ -53,15 +55,13 @@ class File extends discSplFileInfo
 	 */
 	public function open(string $mode = 'r'): self
 	{
-		$path = disc::resolve($this->getPathname());
-
-		if (is_dir($path)) {
-			throw new FileException(disc::resolve($this->getPathname(), true) . ' is a Directory');
-		}
-
 		if (in_array($mode, ['r', 'r+'])) {
-			disc::fileRequired($path);
+			/* required file */
+			$path = $this->getPath(true);
 		} else {
+			/* file not required */
+			$path = $this->getPath();
+
 			disc::autoGenMissingDirectory($path);
 		}
 
@@ -258,7 +258,7 @@ class File extends discSplFileInfo
 	 */
 	public function asArray(int $flags = 0): array
 	{
-		return \file($this->getPathname(), $flags);
+		return \file($this->getPath(true), $flags);
 	}
 
 	/**
@@ -270,7 +270,7 @@ class File extends discSplFileInfo
 	 */
 	public function echo(): int
 	{
-		return \readfile($this->getPathname());
+		return \readfile($this->getPath(true));
 	}
 
 	/**
@@ -282,7 +282,7 @@ class File extends discSplFileInfo
 	 */
 	public function get(): string
 	{
-		return \file_get_contents($this->getPathname());
+		return \file_get_contents($this->getPath(true));
 	}
 
 	/**
@@ -295,7 +295,7 @@ class File extends discSplFileInfo
 	public function save(string $content): int
 	{
 		/* create absolute path */
-		$path = $this->getPathname();
+		$path = $this->getPath();
 
 		disc::autoGenMissingDirectory($path);
 
@@ -332,6 +332,21 @@ class File extends discSplFileInfo
 		return $bytes;
 	}
 
+	protected function copy(string $destination): self
+	{
+		$destination = Disc::resolve($destination);
+
+		if (file_exists($destination)) {
+			throw new FileException('Destination already exsists');
+		}
+
+		disc::autoGenMissingDirectory($destination);
+
+		\copy($this->getPath(true), $destination);
+
+		return new File($destination);
+	}
+
 	/**
 	 * Method remove
 	 *
@@ -343,7 +358,7 @@ class File extends discSplFileInfo
 
 		$success = false;
 
-		$filename = $this->getPathname();
+		$filename = $this->getPath();
 
 		if (file_exists($filename)) {
 			$success = \unlink($filename);
@@ -351,6 +366,8 @@ class File extends discSplFileInfo
 
 		return $success;
 	}
+
+	/* move & rename in DiscSplFileInfo */
 
 	/**
 	 * Method requireOpenFile

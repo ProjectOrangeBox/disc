@@ -7,31 +7,26 @@ namespace dmyers\disc;
 use SplFileInfo;
 use dmyers\disc\exceptions\DiscException;
 
-class discSplFileInfo extends SplFileInfo
+/**
+ * Shared between Disc and File classes
+ * (both extend it)
+ */
+
+class DiscSplFileInfo extends SplFileInfo
 {
-	/**
-	 * Method touch
-	 *
-	 * @return bool
-	 */
 	public function touch(): bool
 	{
-		return \touch($this->getPathname());
+		return \touch($this->getPath(true));
 	}
 
-	/**
-	 * info — Gives information about a file
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return mixed
-	 */
 	public function info(?string $option = null, $arg1 = null) /* array|false */
 	{
 		$info = [];
 
-		$info += \stat($this->getPathname());
-		$info += \pathInfo($this->getPathname());
+		$absPath = $this->getPath(true);
+
+		$info += \stat($absPath);
+		$info += \pathInfo($absPath);
 
 		$info['dirname'] = disc::resolve($info['dirname'], true);
 
@@ -50,8 +45,8 @@ class discSplFileInfo extends SplFileInfo
 		$info['permissions_ugw'] = disc::formatPermissions($permissions, 2);
 
 
-		$info['uid_display'] = $this->owner(true)['name'];
-		$info['gid_display'] = $this->group(true)['name'];
+		$info['uid_display'] = $this->ownerName();
+		$info['gid_display'] = $this->groupName();
 
 		$info['size_display'] = disc::formatSize($this->size());
 
@@ -73,274 +68,120 @@ class discSplFileInfo extends SplFileInfo
 		return $info;
 	}
 
-	/**
-	 * Method isDirectory
-	 *
-	 * @return bool
-	 */
 	public function isDirectory(): bool
 	{
 		return $this->isDir();
 	}
 
-	/**
-	 * dirname — Returns a parent directory's path
-	 *
-	 * @param string $path [path to file/directory]
-	 * @param int $levels The number of parent directories to go up.
-	 *
-	 * @return string
-	 */
 	public function directory(): string
 	{
-		return disc::resolve($this->getPath(), true);
+		return dirname($this->getPath(true, true));
 	}
 
-	/**
-	 * filesize — Gets file size
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return mixed
-	 */
 	public function size(): int
 	{
 		return $this->getSize();
 	}
 
-	/**
-	 * fileatime — Gets last access time of file
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
 	public function accessTime(string $dateFormat = null) /* int|string */
 	{
 		return disc::formatTime($this->getATime(), $dateFormat);
 	}
 
-	/**
-	 * filectime — Gets inode change time of file
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
 	public function changeTime(string $dateFormat = null) /* int|string */
 	{
 		return disc::formatTime($this->getCTime(), $dateFormat);
 	}
 
-	/**
-	 * filemtime — Gets file modification time
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
 	public function modificationTime(string $dateFormat = null) /* int|string */
 	{
 		return disc::formatTime($this->getMTime(), $dateFormat);
 	}
 
-	/**
-	 * filegroup — Gets file group
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return mixed
-	 */
-	public function group(bool $details = false) /* array|int|false */
+	public function group() /* array|int|false */
 	{
-		$id = $this->getGroup();
-
-		return ($id && $details) ? posix_getgrgid($id) : $id;
+		return $this->getGroup();
 	}
 
-	/**
-	 * fileowner — Gets file owner
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
-	public function owner(bool $details = false) /* array|int|false */
+	public function groupName() /* array|int|false */
 	{
-		$id = $this->getOwner();
-
-		return ($id && $details) ? posix_getpwuid($id) : $id;
+		return posix_getgrgid($this->group())['name'];
 	}
 
-	/**
-	 * fileperms — Gets file permissions
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return int
-	 */
+	public function owner() /* array|int|false */
+	{
+		return $this->getOwner();
+	}
+
+	public function ownerName() /* array|int|false */
+	{
+		return posix_getpwuid($this->owner());
+	}
+
 	public function permissions(int $options = 0)
 	{
 		return ($options) ? disc::formatPermissions($this->getPerms(), $options) : $this->getPerms();
 	}
 
-	/**
-	 * Method changePermissions
-	 *
-	 * @param string $requiredPath [explicite description]
-	 * @param int $mode [explicite description]
-	 *
-	 * @return bool
-	 */
 	public function changePermissions(int $mode): bool
 	{
-		return \chmod($this->getPathname(), $mode);
+		return \chmod($this->getPath(true), $mode);
 	}
 
-	/**
-	 * Method changeGroup
-	 *
-	 * @param string $requiredPath [explicite description]
-	 * @param $group [explicite description]
-	 *
-	 * @return bool
-	 */
 	public function changeGroup($group): bool
 	{
-		return \chgrp($this->getPathname(), $group);
+		return \chgrp($this->getPath(true), $group);
 	}
 
-	/**
-	 * Method changeOwner
-	 *
-	 * @param string $requiredPath [explicite description]
-	 * @param $user [explicite description]
-	 *
-	 * @return bool
-	 */
 	public function changeOwner($user): bool
 	{
-		return \chown($this->getPathname(), $user);
+		return \chown($this->getPath(true), $user);
 	}
 
-	/**
-	 * filetype — Gets file type
-	 *
-	 * @param string $path [path to file/directory]
-	 *
-	 * @return mixed
-	 */
 	public function type() /* string|false */
 	{
 		return $this->getType();
 	}
 
-	/**
-	 * Method rename
-	 *
-	 * @param string $name [explicite description]
-	 *
-	 * @return self
-	 */
-	public function rename(string $destination): self
+	public function rename(string $name): self
 	{
-		if (strpos($destination, DIRECTORY_SEPARATOR) !== false) {
-			throw new DiscException('New name must not include a path.');
+		if (strpos($name, DIRECTORY_SEPARATOR) !== false) {
+			throw new DiscException('New name must not include a path. Please use move(...)');
 		}
 
-		$source = $this->getPathname();
-
-		if ($this->isDir) {
-			disc::directoryRequired($source);
-		} else {
-			disc::fileRequired($source);
-		}
-
-		return $this->move(dirname($source) . DIRECTORY_SEPARATOR . $destination);
+		return $this->move(dirname($this->getPath(true)) . DIRECTORY_SEPARATOR . $name);
 	}
 
 	public function move(string $destination): self
 	{
-		$source = $this->getPathname();
-
-		if ($this->isDir) {
-			disc::directoryRequired($source);
-		} else {
-			disc::fileRequired($source);
-		}
-
 		$destination = Disc::resolve($destination);
 
 		if (file_exists($destination)) {
 			throw new DiscException('Destination already exists');
 		}
 
-		\rename($source, $destination);
+		if (!is_dir($destination)) {
+			(new Directory($destination))->create();
+		}
+
+		\rename($this->getPath(true), $destination);
 
 		parent::__construct($destination);
 
 		return $this;
 	}
 
-	/**
-	 * Method copy
-	 *
-	 * @param string $destination [explicite description]
-	 *
-	 * @return bool
-	 */
-	public function copy(string $destination): self
+	public function exists(string $insideDir = null): bool
 	{
-		return ($this->isDir()) ? $this->copyDirectory($destination) : $this->copyFile($destination);
+		$path = ($insideDir == null) ? $this->getPath() : $this->getPath() . DIRECTORY_SEPARATOR . ltrim($insideDir, DIRECTORY_SEPARATOR);
+
+		return \file_exists($path);
 	}
 
-	protected function copyFile(string $destination): self
+	public function getPath(bool $required = null, bool $strip = false): string
 	{
-		$source = $this->getPathname();
+		$required = ($required === true) ? static::TYPE : '';
 
-		disc::fileRequired($source);
-
-		disc::autoGenMissingDirectory($destination);
-
-		$destination = disc::resolve($destination);
-
-		\copy($source, $destination);
-
-		return new File($destination);
-	}
-
-	protected function copyDirectory(string $destination): self
-	{
-		$source = $this->getPathname();
-
-		Disc::directoryRequired($source);
-
-		$destination = Disc::resolve($destination);
-
-		$this->copyRecursive($source, $destination);
-
-		/* return reference to new directory */
-		return new Directory($destination);
-	}
-
-	protected function copyRecursive(string $source, string $destination): void
-	{
-		$dir = opendir($source);
-
-		if (!is_dir($destination)) {
-			$this->mkdir($destination, 0777, true);
-		}
-
-		while ($file = readdir($dir)) {
-			if (($file != '.') && ($file != '..')) {
-				if (is_dir($source . '/' . $file)) {
-					$this->copyRecursive($source . '/' . $file, $destination . '/' . $file);
-				} else {
-					copy($source . '/' . $file, $destination . '/' . $file);
-				}
-			}
-		}
-
-		closedir($dir);
+		return disc::resolve($this->getPathname(), $strip, $required);
 	}
 } /* end class */

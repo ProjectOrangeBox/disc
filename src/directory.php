@@ -5,18 +5,46 @@ declare(strict_types=1);
 namespace dmyers\disc;
 
 use dmyers\disc\discSplFileInfo;
+use dmyers\disc\exceptions\DirectoryException;
 
-class Directory extends discSplFileInfo
+class Directory extends DiscSplFileInfo
 {
+	const TYPE = 'directory';
+
+	/**
+	 * Method filename
+	 *
+	 * @param string $suffix [explicite description]
+	 *
+	 * @return string
+	 */
+	public function name(): string
+	{
+		return $this->getFilename();
+	}
+
+	public function create(int $mode = 0777, bool $recursive = true): bool
+	{
+		$path = $this->getPath();
+
+		$bool = true;
+
+		if (!\file_exists($path)) {
+			$umask = \umask(0);
+			$bool = \mkdir($path, $mode, $recursive);
+			\umask($umask);
+		}
+
+		return $bool;
+	}
+
 	public function list(string $pattern = '*', int $flags = 0, bool $recursive = false): array
 	{
-		$path = $this->getPathname();
-
-		Disc::directoryRequired($path);
+		$path = $this->getPath(true);
 
 		$array = ($recursive) ? $this->listRecursive($path . '/' . $pattern, $flags) : \glob($path . '/' . $pattern, $flags);
 
-		return Disc::stripRootPath($array);
+		return Disc::stripRootPaths($array);
 	}
 
 	public function listAll(string $pattern = '*', int $flags = 0): array
@@ -24,18 +52,23 @@ class Directory extends discSplFileInfo
 		return $this->list($pattern, $flags, true);
 	}
 
-	public function removeContents(bool $quiet = true): bool
+	public function copy(string $destination): self
 	{
-		return $this->remove(false, $quiet);
+		$destination = Disc::resolve($destination);
+
+		if (file_exists($destination)) {
+			throw new DirectoryException('Destination already exsists');
+		}
+
+		$this->copyRecursive($this->getPath(true), $destination);
+
+		/* return reference to new directory */
+		return new Directory($destination);
 	}
 
 	public function remove(bool $removeDirectory = true, bool $quiet = true): bool
 	{
-		$path = $this->getPathname();
-
-		if (!$quiet) {
-			Disc::directoryRequired($path);
-		}
+		$path = $this->getPath(true, !$quiet);
 
 		if (is_dir($path)) {
 			self::removeRecursive($path, $removeDirectory);
@@ -44,10 +77,12 @@ class Directory extends discSplFileInfo
 		return true; /* ?? */
 	}
 
-	public function create(int $mode = 0777, bool $recursive = true): bool
+	public function removeContents(bool $quiet = true): bool
 	{
-		return $this->mkdir($this->getPathname(), $mode, $recursive);
+		return $this->remove(false, $quiet);
 	}
+
+	/* move & rename in DiscSplFileInfo */
 
 	/** protected */
 
@@ -80,16 +115,24 @@ class Directory extends discSplFileInfo
 		}
 	}
 
-	protected function mkdir(string $path, int $mode = 0777, bool $recursive = true): bool
+	protected function copyRecursive(string $source, string $destination): void
 	{
-		if (!\file_exists($path)) {
-			$umask = \umask(0);
-			$bool = \mkdir($path, $mode, $recursive);
-			\umask($umask);
-		} else {
-			$bool = true;
+		$dir = \opendir($source);
+
+		if (!is_dir($destination)) {
+			(new Directory($destination))->create();
 		}
 
-		return $bool;
+		while ($file = \readdir($dir)) {
+			if (($file != '.') && ($file != '..')) {
+				if (\is_dir($source . '/' . $file)) {
+					$this->copyRecursive($source . '/' . $file, $destination . '/' . $file);
+				} else {
+					\copy($source . '/' . $file, $destination . '/' . $file);
+				}
+			}
+		}
+
+		\closedir($dir);
 	}
 } /* end class */

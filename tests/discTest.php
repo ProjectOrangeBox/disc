@@ -14,8 +14,6 @@ In __root__
 use dmyers\disc\disc;
 use PHPUnit\Framework\TestCase;
 use dmyers\disc\exceptions\DiscException;
-use dmyers\disc\exceptions\FileException;
-use dmyers\disc\exceptions\DirectoryException;
 
 final class discTest extends TestCase
 {
@@ -30,7 +28,7 @@ final class discTest extends TestCase
 
 	public function tearDown(): void
 	{
-		//disc::directory('/working')->removeContents();
+		disc::directory('/working')->removeContents();
 	}
 
 	public function testGetRoot(): void
@@ -41,28 +39,10 @@ final class discTest extends TestCase
 	public function testResolve(): void
 	{
 		$this->assertEquals(__ROOT__ . '/123.txt', disc::resolve('/123.txt'));
-		$this->assertEquals(__ROOT__ . '/123.txt', disc::resolve('/123.txt', false, false));
+		$this->assertEquals(__ROOT__ . '/123.txt', disc::resolve('/123.txt', false));
 
 		$this->expectException(DiscException::class);
-		disc::resolve('/xyz.txt', true, true);
-	}
-
-	public function testFileRequired(): void
-	{
-		/* should not throw an exception */
-		$this->assertEquals(null, disc::fileRequired('/files/123.txt'));
-
-		$this->expectException(DiscException::class);
-		disc::fileRequired('/files/xyz.txt');
-	}
-
-	public function testDirectoryRequired(): void
-	{
-		/* should not throw an exception */
-		$this->assertEquals(null, disc::fileRequired('/files/testfolder'));
-
-		$this->expectException(DiscException::class);
-		disc::fileRequired('/files/foobar');
+		disc::resolve('/xyz.txt', true, 'file');
 	}
 
 	public function testStripRootPath(): void
@@ -126,18 +106,14 @@ final class discTest extends TestCase
 		$this->assertEquals('urwxrwxrwx', disc::formatPermissions(0777, 3));
 	}
 
-	public function testMakeDirectory(): void
-	{
-		$this->assertEquals(true, disc::makeDirectory('/working/a/b/c/newtestfolder'));
-
-		$this->assertTrue(disc::exists('/working/a/b/c/newtestfolder'));
-	}
-
 	public function testAutoGenMissingDirectory(): void
 	{
 		$this->assertEquals(true, disc::autoGenMissingDirectory('/working/x/y/z/newtestfolder.txt'));
 
 		$this->assertTrue(disc::exists('/working/x/y/z'));
 		$this->assertFalse(disc::exists('/working/x/y/z/newtestfolder.txt'));
+
+		$this->assertEquals(true, disc::autoGenMissingDirectory('/working/x/a/b/newtestfolder.txt'));
+		$this->assertTrue(disc::exists('/working/x/a/b'));
 	}
 } /* end class */
