@@ -175,17 +175,13 @@ class File extends DiscSplFileInfo
 
 	public function remove(bool $quiet = false): bool
 	{
-		unset($this->fileObject);
-
-		$success = false;
+		if ($this->fileObject) {
+			$this->close();
+		}
 
 		$filename = $this->getPath(!$quiet);
 
-		if (file_exists($filename)) {
-			$success = \unlink($filename);
-		}
-
-		return $success;
+		return (file_exists($filename)) ? \unlink($filename) : false;
 	}
 
 	/* move & rename in DiscSplFileInfo */
