@@ -17,7 +17,7 @@ class fileSplFileObject extends SplFileObject
 
 	public function write(string $string, ?int $length = null) /* int|false */
 	{
-		return ($length) ? $this->fileObject->fwrite($string, $length) : $this->fileObject->fwrite($string);
+		return ($length) ? $this->fwrite($string, $length) : $this->fwrite($string);
 	}
 
 	public function writeLine(string $string, string $lineEnding = null)
@@ -34,21 +34,21 @@ class fileSplFileObject extends SplFileObject
 
 	public function line(): string
 	{
-		return $this->fileObject->fgets();
+		return $this->fgets();
 	}
 
 	public function lock(int $operation, int &$wouldBlock = null): bool
 	{
-		return $this->fileObject->flock($operation, $wouldBlock);
+		return $this->flock($operation, $wouldBlock);
 	}
 
 	public function position(int $position = null): int
 	{
-		return ($position) ? $this->fileObject->fseek($this->handle, $position) : $this->fileObject->ftell($this->handle);
+		return ($position) ? $this->fseek($this->handle, $position) : $this->ftell($this->handle);
 	}
 
 	public function flush(): bool
 	{
-		return $this->fileObject->fflush();
+		return $this->fflush();
 	}
 } /* end class */

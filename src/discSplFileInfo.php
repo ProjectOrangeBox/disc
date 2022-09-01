@@ -80,6 +80,8 @@ class DiscSplFileInfo extends SplFileInfo
 
 	public function size(): int
 	{
+		clearstatcache();
+
 		return $this->getSize();
 	}
 
