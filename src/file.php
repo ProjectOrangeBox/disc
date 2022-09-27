@@ -12,7 +12,7 @@ use dmyers\disc\exceptions\FileException;
 
 class File extends DiscSplFileInfo
 {
-	const TYPE = 'file';
+	const CLASSTYPE = 'file';
 
 	protected $fileObject = null;
 

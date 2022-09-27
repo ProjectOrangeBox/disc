@@ -5,9 +5,9 @@ declare(strict_types=1);
 /*
 In __root__
 
-./vendor/bin/phpunit ./local/disc/tests
+./vendor/bin/phpunit ./libraries/disc/tests 
 
-./vendor/bin/phpunit ./local/disc/tests/fileTest.php
+./vendor/bin/phpunit ./libraries/disc/tests/directoryTest.php
 
 */
 

@@ -38,7 +38,7 @@ disc::include(file);
 disc::includeOnce(file);
 
 $str = disc::formatSize(bytes);
-$str = disc::formatPermissions(mode,option);
+$str = disc::formatPermission(mode,option);
 
 $bool = disc::makeDirectory(path,mode);
 

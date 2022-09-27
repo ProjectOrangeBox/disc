@@ -40,10 +40,9 @@ class DiscSplFileInfo extends SplFileInfo
 
 		$permissions = $this->getPerms();
 
-		$info['permissions_display'] = disc::formatPermissions($permissions, 3);
-		$info['permissions_t'] = disc::formatPermissions($permissions, 1);
-		$info['permissions_ugw'] = disc::formatPermissions($permissions, 2);
-
+		$info['permissions_display'] = disc::formatMode($permissions, DISC::ALL);
+		$info['permissions_t'] = disc::formatMode($permissions, DISC::TYPE);
+		$info['permissions_ugw'] = disc::formatMode($permissions, DISC::PERMISSION);
 
 		$info['uid_display'] = $this->ownerName();
 		$info['gid_display'] = $this->groupName();
@@ -122,7 +121,7 @@ class DiscSplFileInfo extends SplFileInfo
 
 	public function permissions(int $options = 0)
 	{
-		return ($options) ? disc::formatPermissions($this->getPerms(), $options) : $this->getPerms();
+		return ($options) ? disc::formatMode($this->getPerms(), $options) : $this->getPerms();
 	}
 
 	public function changePermissions(int $mode): bool
@@ -182,7 +181,7 @@ class DiscSplFileInfo extends SplFileInfo
 
 	public function getPath(bool $required = null, bool $strip = false): string
 	{
-		$required = ($required === true) ? static::TYPE : '';
+		$required = ($required === true) ? static::CLASSTYPE : '';
 
 		return disc::resolve($this->getPathname(), $strip, $required);
 	}

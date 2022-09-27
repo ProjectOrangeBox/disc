@@ -9,7 +9,8 @@ use dmyers\disc\exceptions\FileException;
 
 class Export
 {
-	const JSONFLAGS = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
+	const JSONDEFAULT = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
+	const JSONPRETTY = JSON_PRETTY_PRINT;
 
 	protected $fileInfo = null;
 	protected $path = null;
@@ -38,7 +39,7 @@ class Export
 
 	public function convertJsonToString($input, bool $pretty = false, ?int $flags = null, ?int $depth = 512): string
 	{
-		$flags = ($flags) ?? self::JSONFLAGS;
+		$flags = ($flags) ?? self::JSONDEFAULT;
 		$depth = ($depth) ?? 512;
 
 		if ($pretty) {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 /*
 In __root__
 
-./vendor/bin/phpunit ./local/disc/tests
+./vendor/bin/phpunit ./libraries/disc/tests 
 
-./vendor/bin/phpunit ./local/disc/tests/discTest.php
+./vendor/bin/phpunit ./libraries/disc/tests/directoryTest.php
 
 */
 
@@ -98,12 +98,12 @@ final class discTest extends TestCase
 		$this->assertEquals('1990-12-25 23:58:00', disc::formatTime(662169480, 'Y-m-d H:i:s'));
 	}
 
-	public function testFormatPermissions(): void
+	public function testFormatMode(): void
 	{
-		$this->assertEquals('urwxrwxrwx', disc::formatPermissions(0777));
-		$this->assertEquals('u', disc::formatPermissions(0777, 1));
-		$this->assertEquals('rwxrwxrwx', disc::formatPermissions(0777, 2));
-		$this->assertEquals('urwxrwxrwx', disc::formatPermissions(0777, 3));
+		$this->assertEquals('urwxrwxrwx', disc::formatMode(0777));
+		$this->assertEquals('u', disc::formatMode(0777, DISC::TYPE));
+		$this->assertEquals('rwxrwxrwx', disc::formatMode(0777, DISC::PERMISSION));
+		$this->assertEquals('urwxrwxrwx', disc::formatMode(0777, DISC::ALL));
 	}
 
 	public function testAutoGenMissingDirectory(): void

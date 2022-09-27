@@ -9,7 +9,7 @@ use dmyers\disc\exceptions\DirectoryException;
 
 class Directory extends DiscSplFileInfo
 {
-	const TYPE = 'directory';
+	const CLASSTYPE = 'directory';
 
 	public function name(): string
 	{
