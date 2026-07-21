@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace peels\disc\disc;
+namespace orange\disc\disc;
 
 use SplFileObject;
 

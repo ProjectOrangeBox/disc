@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace peels\disc\disc;
+namespace orange\disc\disc;
 
 use SplFileInfo;
-use peels\disc\Disc;
-use peels\disc\exceptions\DiscException;
+use orange\disc\Disc;
+use orange\disc\exceptions\DiscException;
 
 /**
  * Shared between Disc and File classes

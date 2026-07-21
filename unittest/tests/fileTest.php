@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use peels\disc\disc;
+use orange\disc\disc;
 use PHPUnit\Framework\TestCase;
 
 final class fileTest extends TestCase

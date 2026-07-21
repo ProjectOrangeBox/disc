@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace peels\disc\exceptions;
+namespace orange\disc\exceptions;
 
 use Exception;
 

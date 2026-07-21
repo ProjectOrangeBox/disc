@@ -22,7 +22,7 @@
     },
     "autoload": {
         "psr-4": {
-            "peels\\disc\\": "src/"
+            "orange\\disc\\": "src/"
         }
     },
     "minimum-stability": "dev",

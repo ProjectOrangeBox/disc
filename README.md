@@ -5,7 +5,7 @@ Because this isn't a offical composer package you need to manually download and 
 ```
     "autoload": {
         "psr-4": {
-            "peels\\disc\\": "local/disc/src/",
+            "orange\\disc\\": "local/disc/src/",
         },
 ```
 

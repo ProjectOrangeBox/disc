@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use peels\disc\Disc;
-use peels\disc\disc\Directory;
+use orange\disc\Disc;
+use orange\disc\disc\Directory;
 use PHPUnit\Framework\TestCase;
-use peels\disc\exceptions\DiscException;
+use orange\disc\exceptions\DiscException;
 
 final class directoryTest extends TestCase
 {
@@ -40,7 +40,7 @@ final class directoryTest extends TestCase
 
     public function testTouch(): void
     {
-        $this->assertInstanceOf(\peels\disc\disc\Directory::class, disc::directory('/files'));
+        $this->assertInstanceOf(\orange\disc\disc\Directory::class, disc::directory('/files'));
     }
 
     public function testInfo(): void

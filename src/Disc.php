@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace peels\disc;
+namespace orange\disc;
 
-use peels\disc\disc\File;
-use peels\disc\disc\Directory;
-use peels\disc\exceptions\DiscException;
-use peels\disc\exceptions\FileException;
+use orange\disc\disc\File;
+use orange\disc\disc\Directory;
+use orange\disc\exceptions\DiscException;
+use orange\disc\exceptions\FileException;
 
 /**
  * File System Functions

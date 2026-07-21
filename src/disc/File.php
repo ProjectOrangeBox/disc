@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace peels\disc\disc;
+namespace orange\disc\disc;
 
-use peels\disc\Disc;
-use peels\disc\disc\Export;
-use peels\disc\disc\Import;
-use peels\disc\disc\DiscSplFileInfo;
-use peels\disc\disc\FileSplFileObject;
-use peels\disc\exceptions\FileException;
+use orange\disc\Disc;
+use orange\disc\disc\Export;
+use orange\disc\disc\Import;
+use orange\disc\disc\DiscSplFileInfo;
+use orange\disc\disc\FileSplFileObject;
+use orange\disc\exceptions\FileException;
 
 class File extends DiscSplFileInfo
 {

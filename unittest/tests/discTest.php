@@ -11,11 +11,11 @@ In __root__
 
 */
 
-use peels\disc\disc;
-use peels\disc\disc\File;
-use peels\disc\disc\Directory;
+use orange\disc\disc;
+use orange\disc\disc\File;
+use orange\disc\disc\Directory;
 use PHPUnit\Framework\TestCase;
-use peels\disc\exceptions\DiscException;
+use orange\disc\exceptions\DiscException;
 
 final class discTest extends TestCase
 {
@@ -75,12 +75,12 @@ final class discTest extends TestCase
 
     public function testFile(): void
     {
-        $this->assertInstanceOf(\peels\disc\disc\File::class, disc::file('/foo.txt'));
+        $this->assertInstanceOf(\orange\disc\disc\File::class, disc::file('/foo.txt'));
     }
 
     public function testDirectory(): void
     {
-        $this->assertInstanceOf(\peels\disc\disc\Directory::class, disc::directory('/foobar'));
+        $this->assertInstanceOf(\orange\disc\disc\Directory::class, disc::directory('/foobar'));
     }
 
     public function testFormatSize(): void
