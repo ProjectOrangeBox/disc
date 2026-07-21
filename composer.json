@@ -1,0 +1,30 @@
+{
+    "name": "orange/disc",
+    "description": "Filesystem synchronisation/management helpers for import/export and file access.",
+    "type": "library",
+    "homepage": "https://github.com/ProjectOrangeBox/disc",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Don Myers",
+            "email": "donmyers@me.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/ProjectOrangeBox/disc/issues",
+        "source": "https://github.com/ProjectOrangeBox/disc"
+    },
+    "require": {
+        "php": ">=8.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "peels\\disc\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
