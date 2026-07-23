@@ -40,8 +40,8 @@ class Export
 
     public function json2String($input, bool $pretty = false, ?int $flags = null, ?int $depth = 512): string
     {
-        $flags = ($flags) ?? self::JSONDEFAULT;
-        $depth = ($depth) ?? 512;
+        $flags ??= self::JSONDEFAULT;
+        $depth ??= 512;
 
         if ($pretty) {
             $flags = $flags | JSON_PRETTY_PRINT;
@@ -89,8 +89,8 @@ class Export
 
     public function json($jsonObj, ?bool $pretty = false, ?int $flags = null, ?int $depth = 512, ?int $chmod = null): int
     {
-        $pretty = ($pretty) ?? false;
-        $depth = ($depth) ?? 512;
+        $pretty ??= false;
+        $depth ??= 512;
 
         return $this->changeModeOnBytes($this->fileInfo->save($this->json2String($jsonObj, $pretty, $flags, $depth)), $chmod);
     }

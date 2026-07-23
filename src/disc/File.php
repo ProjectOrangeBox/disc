@@ -37,7 +37,7 @@ class File extends DiscSplFileInfo
         }
 
         if (!method_exists($this->fileObject, $name)) {
-            trigger_error(sprintf('Call to undefined function: %s::%s().', get_class($this), $name), E_USER_ERROR);
+            trigger_error(sprintf('Call to undefined function: %s::%s().', static::class, $name), E_USER_ERROR);
         }
 
         return $this->fileObject->$name(...$arguments);
@@ -85,7 +85,7 @@ class File extends DiscSplFileInfo
         return $this;
     }
 
-    public function name(string $suffix = null): string
+    public function name(?string $suffix = null): string
     {
         // SplFileInfo::getBasename — Gets the base name of the file
         // SplFileInfo::getFilename — Gets the filename
@@ -198,7 +198,7 @@ class File extends DiscSplFileInfo
         return Disc::resolveWWW($this->getPath(true), Disc::FILE);
     }
 
-    public function download(string $differentFilename = null, string $differentMime = null): void
+    public function download(?string $differentFilename = null, ?string $differentMime = null): void
     {
         $filename = $differentFilename ?? $this->getFilename();
         $mime = $differentMime ?? $this->mime();
@@ -227,7 +227,7 @@ class File extends DiscSplFileInfo
         exit;
     }
 
-    public function getPath(bool $required = null, bool $strip = false): string
+    public function getPath(?bool $required = null, bool $strip = false): string
     {
         // show the correct error
         $required = ($required === true) ? Disc::FILE : 0;

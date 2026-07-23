@@ -21,9 +21,9 @@ class FileSplFileObject extends SplFileObject
         return ($length) ? $this->fwrite($string, $length) : $this->fwrite($string);
     }
 
-    public function writeLine(string $string, string $lineEnding = null): int|false
+    public function writeLine(string $string, ?string $lineEnding = null): int|false
     {
-        $lineEnding = ($lineEnding) ?? PHP_EOL;
+        $lineEnding ??= PHP_EOL;
 
         return $this->write($string . $lineEnding);
     }
@@ -38,12 +38,12 @@ class FileSplFileObject extends SplFileObject
         return $this->fgets();
     }
 
-    public function lock(int $operation, int &$wouldBlock = null): bool
+    public function lock(int $operation, ?int &$wouldBlock = null): bool
     {
         return $this->flock($operation, $wouldBlock);
     }
 
-    public function position(int $position = null): int
+    public function position(?int $position = null): int
     {
         return ($position) ? $this->fseek($this->handle, $position) : $this->ftell($this->handle);
     }

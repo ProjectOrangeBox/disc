@@ -86,7 +86,7 @@ class Directory extends DiscSplFileInfo
         return $files;
     }
 
-    public function getPath(bool $required = null, bool $strip = false): string
+    public function getPath(?bool $required = null, bool $strip = false): string
     {
         // show the correct error
         $required = ($required === true) ? Disc::FOLDER : 0;

@@ -38,7 +38,7 @@ class DiscSplFileInfo extends SplFileInfo
 
         $info['type'] = $this->getType();
 
-        $dateFormat = ($arg1) ? $arg1 : 'r';
+        $dateFormat = $arg1 ?: 'r';
 
         $info['atime_display'] = $this->accessTime($dateFormat);
         $info['mtime_display'] = $this->modificationTime($dateFormat);
@@ -90,17 +90,17 @@ class DiscSplFileInfo extends SplFileInfo
         return ($format) ? Disc::formatSize($this->getSize()) : $this->getSize();
     }
 
-    public function accessTime(string $dateFormat = null): int|string
+    public function accessTime(?string $dateFormat = null): int|string
     {
         return Disc::formatTime($this->getATime(), $dateFormat);
     }
 
-    public function changeTime(string $dateFormat = null): int|string
+    public function changeTime(?string $dateFormat = null): int|string
     {
         return Disc::formatTime($this->getCTime(), $dateFormat);
     }
 
-    public function modificationTime(string $dateFormat = null): int|string
+    public function modificationTime(?string $dateFormat = null): int|string
     {
         return Disc::formatTime($this->getMTime(), $dateFormat);
     }
@@ -160,7 +160,7 @@ class DiscSplFileInfo extends SplFileInfo
 
     public function rename(string $name): self
     {
-        if (strpos($name, DIRECTORY_SEPARATOR) !== false) {
+        if (str_contains($name, DIRECTORY_SEPARATOR)) {
             throw new DiscException('New name must not include a path. Please use move(...)');
         }
 
@@ -176,7 +176,7 @@ class DiscSplFileInfo extends SplFileInfo
         }
 
         if (!is_dir($destination)) {
-            (new Directory($destination))->create();
+            new Directory($destination)->create();
         }
 
         \rename($this->getPath(true), $destination);
@@ -186,7 +186,7 @@ class DiscSplFileInfo extends SplFileInfo
         return $this;
     }
 
-    public function exists(string $insideDir = null): bool
+    public function exists(?string $insideDir = null): bool
     {
         $path = ($insideDir == null) ? $this->getPath() : $this->getPath() . DIRECTORY_SEPARATOR . ltrim($insideDir, DIRECTORY_SEPARATOR);
 

@@ -47,9 +47,9 @@ class Import
     {
         $this->fileExists();
 
-        $associative = ($associative) ?? false;
-        $depth = ($depth) ?? 512;
-        $flags = ($flags) ?? 0;
+        $associative ??= false;
+        $depth ??= 512;
+        $flags ??= 0;
 
         $json = json_decode(file_get_contents($this->path), $associative, $depth, $flags);
 
@@ -63,12 +63,12 @@ class Import
     /**
      * Method ini
      */
-    public function ini(bool $processSections = null, int $scannerMode = null): array|false
+    public function ini(?bool $processSections = null, ?int $scannerMode = null): array|false
     {
         $this->fileExists();
 
-        $processSections = ($processSections) ?? true;
-        $scannerMode = ($scannerMode) ?? INI_SCANNER_NORMAL;
+        $processSections ??= true;
+        $scannerMode ??= INI_SCANNER_NORMAL;
 
         $ini = false;
 
