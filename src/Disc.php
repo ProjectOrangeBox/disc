@@ -298,9 +298,13 @@ class Disc
 
     public static function formatSize(int $bytes): string
     {
-        $i = floor(log($bytes, 1024));
+        $units = ['B', 'kB', 'MB', 'GB', 'TB'];
+        $precision = [0, 1, 2, 2, 3];
 
-        return round($bytes / 1024 ** $i, [0, 1, 2, 2, 3][$i]) . ['B', 'kB', 'MB', 'GB', 'TB'][$i];
+        /* log(0) is -INF and anything above TB runs off the end of both tables */
+        $i = ($bytes > 0) ? min((int) floor(log($bytes, 1024)), count($units) - 1) : 0;
+
+        return round($bytes / 1024 ** $i, $precision[$i]) . $units[$i];
     }
 
     /**

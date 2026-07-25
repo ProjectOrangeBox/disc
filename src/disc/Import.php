@@ -30,8 +30,6 @@ class Import
 
     /**
      * Method php
-     *
-     * @return void
      */
     public function php(): mixed
     {
@@ -43,13 +41,9 @@ class Import
     /**
      * Method json
      */
-    public function json(bool $associative = false, int $depth = 512, int $flags = 0): string
+    public function json(bool $associative = false, int $depth = 512, int $flags = 0): mixed
     {
         $this->fileExists();
-
-        $associative ??= false;
-        $depth ??= 512;
-        $flags ??= 0;
 
         $json = json_decode(file_get_contents($this->path), $associative, $depth, $flags);
 

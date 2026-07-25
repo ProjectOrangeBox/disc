@@ -13,7 +13,9 @@ use orange\disc\exceptions\FileException;
 
 class File extends DiscSplFileInfo
 {
-    protected $fileObject = null;
+    protected const PATH_TYPE = Disc::FILE;
+
+    protected ?FileSplFileObject $fileObject = null;
 
     public $import = null;
     public $export = null;
@@ -55,8 +57,8 @@ class File extends DiscSplFileInfo
             Disc::autoGenMissingDirectory($path);
         }
 
-        /* close properly */
-        unset($this->fileObject);
+        /* close properly - dropping the last reference closes the handle */
+        $this->fileObject = null;
 
         /* make a new one */
         $this->fileObject = new fileSplFileObject($path, $mode);
@@ -80,7 +82,7 @@ class File extends DiscSplFileInfo
             throw new FileException('No file open');
         }
 
-        unset($this->fileObject);
+        $this->fileObject = null;
 
         return $this;
     }
@@ -92,6 +94,9 @@ class File extends DiscSplFileInfo
         return ($suffix) ? $this->getBasename($suffix) : $this->getFilename();
     }
 
+    /**
+     * @param int-mask<FILE_USE_INCLUDE_PATH, FILE_IGNORE_NEW_LINES, FILE_SKIP_EMPTY_LINES, FILE_NO_DEFAULT_CONTEXT> $flags
+     */
     public function asArray(int $flags = 0): array
     {
         return \file($this->getPath(true), $flags);
@@ -225,13 +230,5 @@ class File extends DiscSplFileInfo
 
         fclose($fp);
         exit;
-    }
-
-    public function getPath(?bool $required = null, bool $strip = false): string
-    {
-        // show the correct error
-        $required = ($required === true) ? Disc::FILE : 0;
-
-        return Disc::resolve($this->getPathname(), $strip, $required);
     }
 }

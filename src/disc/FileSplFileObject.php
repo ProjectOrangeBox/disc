@@ -9,7 +9,6 @@ use SplFileObject;
 class FileSplFileObject extends SplFileObject
 {
     /* wrappers for "f" methods */
-    protected $handle;
 
     public function characters(int $length): string|false
     {
@@ -45,7 +44,7 @@ class FileSplFileObject extends SplFileObject
 
     public function position(?int $position = null): int
     {
-        return ($position) ? $this->fseek($this->handle, $position) : $this->ftell($this->handle);
+        return ($position) ? $this->fseek($position) : $this->ftell();
     }
 
     public function flush(): bool

@@ -9,6 +9,8 @@ use orange\disc\disc\DiscSplFileInfo;
 
 class Directory extends DiscSplFileInfo
 {
+    protected const PATH_TYPE = Disc::FOLDER;
+
     public function name(): string
     {
         return $this->getFilename();
@@ -57,15 +59,13 @@ class Directory extends DiscSplFileInfo
             $dir = new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS);
             $dir = new \RecursiveIteratorIterator($dir, \RecursiveIteratorIterator::CHILD_FIRST);
 
-            if (is_array($dir)) {
-                foreach ($dir as $file) {
-                    // Comparing the current time with the time when file was created
-                    if ($file && $now - filemtime($file) >= 60 * 60 * 24 * $days) {
-                        if ($file->isFile()) {
-                            unlink($file);
-                        } elseif ($file->isDir()) {
-                            rmdir($file);
-                        }
+            foreach ($dir as $file) {
+                // remove files/directories older than $days
+                if ($now - filemtime((string) $file) >= 60 * 60 * 24 * $days) {
+                    if ($file->isFile()) {
+                        unlink((string) $file);
+                    } elseif ($file->isDir()) {
+                        rmdir((string) $file);
                     }
                 }
             }
@@ -84,13 +84,5 @@ class Directory extends DiscSplFileInfo
         }
 
         return $files;
-    }
-
-    public function getPath(?bool $required = null, bool $strip = false): string
-    {
-        // show the correct error
-        $required = ($required === true) ? Disc::FOLDER : 0;
-
-        return Disc::resolve($this->getPathname(), $strip, $required);
     }
 }

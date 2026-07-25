@@ -15,9 +15,26 @@ use orange\disc\exceptions\DiscException;
 
 class DiscSplFileInfo extends SplFileInfo
 {
+    /**
+     * Path type (Disc::FILE / Disc::FOLDER) used to select the correct
+     * "not found" error when a required path is missing. Subclasses override it.
+     */
+    protected const PATH_TYPE = 0;
+
     public function __construct(string $filename)
     {
         parent::__construct(Disc::resolve($filename));
+    }
+
+    /**
+     * Resolve this entry's path. When $required is true, a missing path raises
+     * the file/directory "not found" error chosen by the subclass's PATH_TYPE.
+     */
+    public function getPath(?bool $required = null, bool $strip = false): string
+    {
+        $required = ($required === true) ? static::PATH_TYPE : 0;
+
+        return Disc::resolve($this->getPathname(), $strip, $required);
     }
 
     public function touch(): bool
