@@ -31,15 +31,24 @@ class Directory extends DiscSplFileInfo
         return $bool;
     }
 
+    /**
+     * @return array<array-key, string>
+     */
     public function list(string $pattern = '*', int $flags = 0, bool $recursive = false): array
     {
         $path = $this->getPath(true);
 
-        $array = ($recursive) ? $this->listRecursive($path . DIRECTORY_SEPARATOR . $pattern, $flags) : \glob($path . DIRECTORY_SEPARATOR . $pattern, $flags);
+        // glob() returns false for a directory it cannot read
+        $array = ($recursive)
+            ? $this->listRecursive($path . DIRECTORY_SEPARATOR . $pattern, $flags)
+            : (\glob($path . DIRECTORY_SEPARATOR . $pattern, $flags) ?: []);
 
         return Disc::stripRootPaths($array);
     }
 
+    /**
+     * @return array<array-key, string>
+     */
     public function listAll(string $pattern = '*', int $flags = 0): array
     {
         return $this->list($pattern, $flags, true);
@@ -74,11 +83,15 @@ class Directory extends DiscSplFileInfo
 
     /** protected */
 
+    /**
+     * @return list<string>
+     */
     protected function listRecursive(string $pattern, int $flags = 0): array
     {
-        $files = \glob($pattern, $flags);
+        $files = \glob($pattern, $flags) ?: [];
+        $directories = \glob(\dirname($pattern) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR | GLOB_NOSORT) ?: [];
 
-        foreach (\glob(\dirname($pattern) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR | GLOB_NOSORT) as $directory) {
+        foreach ($directories as $directory) {
             /* recursive loop */
             $files = \array_merge($files, self::listRecursive($directory . DIRECTORY_SEPARATOR . \basename($pattern), $flags));
         }

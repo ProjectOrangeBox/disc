@@ -42,7 +42,10 @@ class DiscSplFileInfo extends SplFileInfo
         return \touch($this->getPath(true));
     }
 
-    public function info(?string $option = null, $arg1 = null): array|false
+    /**
+     * @return array<string, mixed>|false
+     */
+    public function info(?string $option = null, mixed $arg1 = null): array|false
     {
         $info = [];
 
@@ -70,7 +73,7 @@ class DiscSplFileInfo extends SplFileInfo
         $info['uid_display'] = $this->ownerName();
         $info['gid_display'] = $this->groupName();
 
-        $info['size_display'] = Disc::formatSize($this->size());
+        $info['size_display'] = Disc::formatSize((int) $this->size());
 
         $info['isDirectory'] = (bool)$this->isDirectory();
         $info['isWritable'] = (bool)$this->isWritable();
@@ -104,7 +107,14 @@ class DiscSplFileInfo extends SplFileInfo
     {
         clearstatcache();
 
-        return ($format) ? Disc::formatSize($this->getSize()) : $this->getSize();
+        // getSize() returns false when the file cannot be stat'ed
+        $size = $this->getSize();
+
+        if ($size === false) {
+            throw new DiscException('Could not read the size of "' . $this->getPath(true) . '".');
+        }
+
+        return ($format) ? Disc::formatSize($size) : $size;
     }
 
     public function accessTime(?string $dateFormat = null): int|string
@@ -122,6 +132,9 @@ class DiscSplFileInfo extends SplFileInfo
         return Disc::formatTime($this->getMTime(), $dateFormat);
     }
 
+    /**
+     * @return array<array-key, mixed>|int|false
+     */
     public function group(): array|int|false
     {
         return $this->getGroup();
@@ -129,9 +142,17 @@ class DiscSplFileInfo extends SplFileInfo
 
     public function groupName(): string
     {
-        return posix_getgrgid($this->group())['name'];
+        // getGroup() returns false when the file cannot be stat'ed, and
+        // posix_getgrgid() returns false for a gid the system does not know
+        $group = $this->group();
+        $entry = is_int($group) ? posix_getgrgid($group) : false;
+
+        return $entry === false ? '' : $entry['name'];
     }
 
+    /**
+     * @return array<array-key, mixed>|int|false
+     */
     public function owner(): array|int|false
     {
         return $this->getOwner();
@@ -139,14 +160,19 @@ class DiscSplFileInfo extends SplFileInfo
 
     public function ownerName(): string
     {
-        return posix_getpwuid($this->owner())['name'];
+        // getOwner() returns false when the file cannot be stat'ed, and
+        // posix_getpwuid() returns false for a uid the system does not know
+        $owner = $this->owner();
+        $entry = is_int($owner) ? posix_getpwuid($owner) : false;
+
+        return $entry === false ? '' : $entry['name'];
     }
 
-    public function permissions(int $options = 0)
+    public function permissions(int $options = 0): int|string
     {
         $rawPerms = $this->getPerms();
 
-        return ($options) ? Disc::formatMode($rawPerms, $options) : octdec(substr(sprintf('%o', $rawPerms), -4));
+        return ($options) ? Disc::formatMode($rawPerms, $options) : (int) octdec(substr(sprintf('%o', $rawPerms), -4));
     }
 
     public function changePermissions(int $mode): bool
@@ -160,12 +186,12 @@ class DiscSplFileInfo extends SplFileInfo
         return $rtn;
     }
 
-    public function changeGroup($group): bool
+    public function changeGroup(string|int $group): bool
     {
         return \chgrp($this->getPath(true), $group);
     }
 
-    public function changeOwner($user): bool
+    public function changeOwner(string|int $user): bool
     {
         return \chown($this->getPath(true), $user);
     }

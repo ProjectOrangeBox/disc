@@ -17,8 +17,8 @@ class File extends DiscSplFileInfo
 
     protected ?FileSplFileObject $fileObject = null;
 
-    public $import = null;
-    public $export = null;
+    public Import $import;
+    public Export $export;
 
     public function __construct(string $path)
     {
@@ -30,8 +30,10 @@ class File extends DiscSplFileInfo
 
     /**
      * Method __call
+     *
+     * @param array<array-key, mixed> $arguments
      */
-    public function __call(string $name, $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
         /* throws error on fail */
         if (!$this->fileObject) {
@@ -96,20 +98,40 @@ class File extends DiscSplFileInfo
 
     /**
      * @param int-mask<FILE_USE_INCLUDE_PATH, FILE_IGNORE_NEW_LINES, FILE_SKIP_EMPTY_LINES, FILE_NO_DEFAULT_CONTEXT> $flags
+     * @return list<string>
      */
     public function asArray(int $flags = 0): array
     {
-        return \file($this->getPath(true), $flags);
+        // file() returns false for a file it cannot read
+        $lines = \file($this->getPath(true), $flags);
+
+        if ($lines === false) {
+            throw new FileException('Could not read "' . $this->getPath(true) . '".');
+        }
+
+        return $lines;
     }
 
     public function echo(): int
     {
-        return \readfile($this->getPath(true));
+        $bytes = \readfile($this->getPath(true));
+
+        if ($bytes === false) {
+            throw new FileException('Could not read "' . $this->getPath(true) . '".');
+        }
+
+        return $bytes;
     }
 
     public function contents(): string
     {
-        return \file_get_contents($this->getPath(true));
+        $contents = \file_get_contents($this->getPath(true));
+
+        if ($contents === false) {
+            throw new FileException('Could not read "' . $this->getPath(true) . '".');
+        }
+
+        return $contents;
     }
 
     /**
@@ -159,7 +181,14 @@ class File extends DiscSplFileInfo
 
     public function mime(): string
     {
-        return mime_content_type($this->getPath(true));
+        // mime_content_type() returns false when it cannot determine the type
+        $mime = mime_content_type($this->getPath(true));
+
+        if ($mime === false) {
+            throw new FileException('Could not determine the mime type of "' . $this->getPath(true) . '".');
+        }
+
+        return $mime;
     }
 
     public function isImage(): bool
@@ -177,6 +206,10 @@ class File extends DiscSplFileInfo
 
         $details = getimagesize($path);
 
+        if ($details === false) {
+            throw new FileException('Could not read the image size of "' . $path . '".');
+        }
+
         return $details[0];
     }
 
@@ -190,12 +223,19 @@ class File extends DiscSplFileInfo
 
         $details = getimagesize($path);
 
+        if ($details === false) {
+            throw new FileException('Could not read the image size of "' . $path . '".');
+        }
+
         return $details[1];
     }
 
     public function datauri(): string
     {
-        return 'data:' . $this->mime() . ';base64,' . base64_decode(file_get_contents($this->getPath(true)));
+        // contents() already fails loudly on an unreadable file, and this was
+        // decoding rather than encoding - a data uri carries base64, so the
+        // bytes have to be encoded on the way in
+        return 'data:' . $this->mime() . ';base64,' . base64_encode($this->contents());
     }
 
     public function src(): string
@@ -208,7 +248,12 @@ class File extends DiscSplFileInfo
         $filename = $differentFilename ?? $this->getFilename();
         $mime = $differentMime ?? $this->mime();
 
+        // fopen() returns false when the file cannot be opened for reading
         $fp = fopen($this->getPath(true), 'rb');
+
+        if ($fp === false) {
+            throw new FileException('Could not open "' . $this->getPath(true) . '" for reading.');
+        }
 
         // Clean output buffer
         if (ob_get_level() !== 0 && @ob_end_clean() === false) {

@@ -10,13 +10,10 @@ use orange\disc\exceptions\FileException;
 
 class Import
 {
-    protected $fileInfo = null;
-    protected $path = null;
+    protected string $path;
 
-    public function __construct(File $fileInfo)
+    public function __construct(protected File $fileInfo)
     {
-        $this->fileInfo = $fileInfo;
-
         $this->path = $this->fileInfo->getPathname();
     }
 
@@ -45,7 +42,15 @@ class Import
     {
         $this->fileExists();
 
-        $json = json_decode(file_get_contents($this->path), $associative, $depth, $flags);
+        // file_get_contents() returns false for a file it cannot read, and
+        // json_decode()'s $depth must be at least 1
+        $contents = file_get_contents($this->path);
+
+        if ($contents === false) {
+            throw new FileException('Could not read "' . Disc::resolve($this->path, true) . '".');
+        }
+
+        $json = json_decode($contents, $associative, max(1, $depth), $flags);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new FileException('JSON file "' . Disc::resolve($this->path, true) . '" is not valid JSON.');
@@ -56,6 +61,8 @@ class Import
 
     /**
      * Method ini
+     *
+     * @return array<array-key, mixed>|false
      */
     public function ini(?bool $processSections = null, ?int $scannerMode = null): array|false
     {
@@ -82,13 +89,22 @@ class Import
         return \file_get_contents($this->path);
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function csv(bool $includeHeader = true, string $separator = ",", string $enclosure = '"', string $escape = "\\"): array
     {
         $this->fileExists();
 
         $table = [];
         $keys = null;
+
+        // fopen() returns false when the file cannot be opened for reading
         $handle = fopen($this->path, 'r');
+
+        if ($handle === false) {
+            throw new FileException('Could not open "' . Disc::resolve($this->path, true) . '" for reading.');
+        }
 
         while (($columns = fgetcsv($handle, 8192, $separator, $enclosure, $escape)) !== false) {
             if ($includeHeader) {
@@ -101,7 +117,8 @@ class Import
                     }
                 }
 
-                $table[] = array_combine($keys, $columns);
+                // a CSV cell can be null, which array_combine() will not take as a key
+                $table[] = array_combine(array_map(strval(...), $keys), $columns);
             }
         }
 

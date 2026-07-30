@@ -37,6 +37,10 @@ class FileSplFileObject extends SplFileObject
         return $this->fgets();
     }
 
+    /**
+     * @param int<0, 7> $operation one of the LOCK_* constants, optionally
+     *     combined with LOCK_NB
+     */
     public function lock(int $operation, ?int &$wouldBlock = null): bool
     {
         return $this->flock($operation, $wouldBlock);
@@ -44,7 +48,14 @@ class FileSplFileObject extends SplFileObject
 
     public function position(?int $position = null): int
     {
-        return ($position) ? $this->fseek($position) : $this->ftell();
+        // fseek() returns 0 or -1, ftell() returns false on failure
+        if ($position !== null && $position !== 0) {
+            return $this->fseek($position);
+        }
+
+        $current = $this->ftell();
+
+        return $current === false ? -1 : $current;
     }
 
     public function flush(): bool
