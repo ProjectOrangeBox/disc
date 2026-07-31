@@ -67,7 +67,11 @@ final class directoryTest extends TestCase
 
     public function testSize(): void
     {
-        $this->assertEquals(224, disc::directory('/files')->size());
+        // A directory's own size is whatever the filesystem records for it, not
+        // the size of its contents - 224 on APFS here, 4096 on the ext4 CI
+        // runner. Taken from the filesystem for the same reason the time
+        // assertions below use fileatime() rather than a literal.
+        $this->assertEquals(filesize(__ROOT__ . '/files'), disc::directory('/files')->size());
     }
 
     public function testAccessTime(): void
